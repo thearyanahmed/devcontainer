@@ -1,7 +1,7 @@
 # Use the official Node.js 20 image as base
 FROM mcr.microsoft.com/devcontainers/javascript-node:20-bullseye
 
-# Install additional tools for Next.js development
+# Install additional tools for Next.js development and DigitalOcean integration
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
         git \

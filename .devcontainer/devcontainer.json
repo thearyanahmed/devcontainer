@@ -1,7 +1,7 @@
 {
   "name": "Next.js Documentation Site",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20-bullseye",
-  
+
   // Features to add to the dev container
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
@@ -56,19 +56,24 @@
   },
 
   // Use 'postCreateCommand' to run commands after the container is created
-  "postCreateCommand": "npm install",
+  "postCreateCommand": "npm install && bash .devcontainer/setup-digitalocean.sh",
 
   // Use 'postStartCommand' to run commands after the container starts
   "postStartCommand": "echo 'DevContainer is ready! Run npm run dev to start the development server.'",
 
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root
   "remoteUser": "node",
-  
+
   // Set the default location of the workspace folder
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
   // Configure container environment
   "containerEnv": {
     "NODE_ENV": "development"
+  },
+
+  // Environment variables passed from host to container
+  "remoteEnv": {
+    "DIGITALOCEAN_API_TOKEN": "${localEnv:DIGITALOCEAN_TOKEN}"
   }
 }

@@ -7,11 +7,33 @@ This repository includes a complete DevContainer configuration for streamlined d
 ### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) installed and running
 - [Visual Studio Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- **DigitalOcean Personal Access Token** (optional, for DigitalOcean integration)
+
+### Environment Setup (Optional - For DigitalOcean Integration)
+Before opening the container, set up your DigitalOcean access token:
+
+1. **Get your DigitalOcean token**:
+   - Go to [DigitalOcean API Tokens](https://cloud.digitalocean.com/account/api/tokens)
+   - Generate a new Personal Access Token with read/write permissions
+
+2. **Set environment variable** on your host machine:
+   ```bash
+   # Option 1: Set in your shell profile (~/.zshrc, ~/.bashrc, etc.)
+   export DIGITALOCEAN_ACCESS_TOKEN="your_token_here"
+   
+   # Option 2: Alternative variable names (any will work)
+   export DO_TOKEN="your_token_here"
+   # or
+   export DOCTL_ACCESS_TOKEN="your_token_here"
+   ```
+
+3. **Restart VS Code** to pick up the new environment variable
 
 ### Getting Started
 1. **Open the project in VS Code**
 2. **Reopen in Container**: When prompted, click "Reopen in Container" or use `Ctrl+Shift+P` → "Dev Containers: Reopen in Container"
 3. **Wait for setup**: The container will build and install dependencies automatically
+   - This includes installing doctl and setting up the DigitalOcean MCP server
 4. **Start developing**: Run `npm run dev` to start the development server
 
 ## 📁 DevContainer Configuration
@@ -19,9 +41,41 @@ This repository includes a complete DevContainer configuration for streamlined d
 ### File Structure
 ```
 .devcontainer/
-├── devcontainer.json    # Main configuration file
-└── Dockerfile          # Custom development image
+├── devcontainer.json       # Main configuration file
+├── Dockerfile             # Custom development image
+└── setup-digitalocean.sh  # DigitalOcean tools setup script
 ```
+
+### DigitalOcean MCP Server Integration
+The DevContainer automatically installs the [DigitalOcean MCP server](https://github.com/digitalocean-labs/mcp-digitalocean) which allows Claude Desktop to interact with your DigitalOcean resources.
+
+**Installation**: `@digitalocean/mcp` npm package (globally installed)
+
+**Usage**: 
+```bash
+# Enable specific services (recommended)
+npx @digitalocean/mcp --services apps,droplets
+
+# Enable all services
+npx @digitalocean/mcp --services apps,droplets,databases,kubernetes,load-balancers
+```
+
+**To use with Claude Desktop**:
+1. Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+   ```json
+   {
+     "mcpServers": {
+       "digitalocean": {
+         "command": "npx",
+         "args": ["@digitalocean/mcp", "--services", "apps,droplets"],
+         "env": {
+           "DIGITALOCEAN_ACCESS_TOKEN": "your_token_here"
+         }
+       }
+     }
+   }
+   ```
+2. Restart Claude Desktop to enable the MCP server
 
 ### Key Features
 - **Node.js 20 LTS** with TypeScript support
@@ -30,6 +84,9 @@ This repository includes a complete DevContainer configuration for streamlined d
 - **Automatic dependency installation** on container creation
 - **Zsh with Oh My Zsh** for enhanced terminal experience
 - **GitHub CLI** pre-installed
+- **DigitalOcean CLI (doctl)** pre-installed
+- **DigitalOcean MCP server** for Claude Desktop integration
+- **Python 3** with pip for MCP server support
 
 ## 🛠 Development Commands
 
@@ -49,6 +106,24 @@ npm run lint
 
 # Install new dependencies
 npm install <package-name>
+```
+
+### DigitalOcean Commands
+```bash
+# Check doctl version
+doctl version
+
+# List your DigitalOcean droplets
+doctl compute droplet list
+
+# Get account information
+doctl account get
+
+# List all available doctl commands
+doctl --help
+
+# Authenticate doctl (if not done automatically)
+doctl auth init --access-token YOUR_TOKEN
 ```
 
 ### Development Server
@@ -154,6 +229,25 @@ Add to `.devcontainer/devcontainer.json`:
 1. **Reload window**: `Ctrl+Shift+P` → "Developer: Reload Window"
 2. **Reinstall extensions**: They should auto-install in container
 3. **Check extension compatibility**: Some extensions may not work in containers
+
+### DigitalOcean Integration Issues
+1. **doctl not authenticated**:
+   ```bash
+   # Check if token is set
+   echo $DIGITALOCEAN_ACCESS_TOKEN
+   
+   # Manually authenticate
+   doctl auth init --access-token YOUR_TOKEN
+   ```
+2. **Environment variables not passed**:
+   - Ensure token is set on host machine before starting container
+   - Restart VS Code after setting environment variables
+   - Check container environment: `env | grep DIGITALOCEAN`
+3. **MCP server not working**:
+   - Check if MCP package is installed: `npm list -g @digitalocean/mcp`
+   - Test MCP server: `npx @digitalocean/mcp --help`
+   - Test with specific services: `npx @digitalocean/mcp --services apps`
+   - Reinstall if needed: `npm install -g @digitalocean/mcp`
 
 ## 🔄 Maintenance
 
