@@ -59,7 +59,7 @@
   "postCreateCommand": "npm install && bash .devcontainer/setup-digitalocean.sh",
 
   // Use 'postStartCommand' to run commands after the container starts
-  "postStartCommand": "echo 'DevContainer is ready! Run npm run dev to start the development server.'",
+  "postStartCommand": "if [ -n \"$DIGITALOCEAN_API_TOKEN\" ]; then doctl auth init --access-token \"$DIGITALOCEAN_API_TOKEN\" && echo '✅ doctl authenticated successfully'; else echo '⚠️ DIGITALOCEAN_API_TOKEN not set - doctl authentication skipped'; fi && echo 'DevContainer is ready! Run npm run dev to start the development server.'",
 
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root
   "remoteUser": "node",
